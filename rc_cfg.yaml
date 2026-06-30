@@ -1,0 +1,112 @@
+# ============================================================
+# smart_rc_car 硬件配置（整合 chassis / arm / hand / wheel / shooter）
+#
+#   上位机 Host       : NVIDIA Jetson Orin Nano
+#   下位机 Controller : 鲸鱼 MC602 主控
+#
+# 本文件中的端口/ID 均为 MC602 上的资源编号。
+# ============================================================
+
+# ---- 自动巡航 ----
+auto_lane:
+  forward_speed: 0.2                      # 前进速度 (m/s)
+  pid_y:                                  # 巡线 Y 偏移 PID
+    Kp: 5
+    Ki: 0.1
+    Kd: 0
+    setpoint: 0
+    output_limits: [-0.7, 0.7]            # 横向速度范围 (m/s)
+  pid_angle:                              # 巡线角度 PID
+    Kp: 3
+    Ki: 0
+    Kd: 0
+    setpoint: 0
+    output_limits: [-1.5, 1.5]            # 角速度范围 (rad/s)
+
+# ---- 视觉对齐 ----
+# PID 方向由代码根据手臂左右侧自动处理
+visual_align:
+  pid:                                    # 视觉对齐 PID
+    Kp: 1
+    Ki: 0
+    Kd: 0
+    setpoint: 0
+    output_limits: [-0.15, 0.15]          # X 方向速度范围 (m/s)
+
+# ---- 升降轴 Y ----
+vertical:
+  motor:
+    id: 3                                 # 电机 ID
+    reverse: 1                            # 反向
+    perimeter: 0.008                      # 丝杆导程 (m)
+  limit_port: 5                           # 磁敏限位 ADC 端口
+  pid:                                    # 升降 PID
+    Kp: 4
+    Ki: 0.1
+    Kd: 0.1
+    setpoint: 0
+    output_limits: [-0.04, 0.04]          # 升降速度范围 (m/s)
+  threshold: [0, 0.2]                     # 位置阈值 (m)
+
+# ---- 伸缩轴 X ----
+horizontal:
+  motor:
+    id: 6                                 # 电机 ID
+    reverse: 1                            # 反向
+    type: motor_280                       # 电机类型
+    perimeter: 0.032                      # 同步带导程 (m)
+  pid:                                    # 伸缩 PID
+    Kp: 6
+    Ki: 0
+    Kd: 0
+    setpoint: 0
+    output_limits: [-0.2, 0.2]            # 伸缩速度范围 (m/s)
+  threshold: [0, 0.315]                   # 位置阈值 (m)
+
+# ---- 手臂左右摆 ----
+arm:
+  port: 1                                 # 舵机端口
+  angle_list:                             # 手臂左右摆角度
+    LEFT: 93
+    MID: 0
+    RIGHT: -93
+
+# ---- 手爪上下 ----
+hand:
+  port: 3                                 # 舵机端口
+  mode: 180                               # 180° 模式
+  angle_list:                             # 手爪俯仰角度
+    UP: -50
+    DOWN: 40
+
+# ---- 气泵抓取 ----
+grasp:
+  port_pump: 2                            # 气泵 IO
+  port_valve: 3                           # 电磁阀 IO
+
+# ---- 底盘 ----
+chassis:
+  port_list: [1, 2, 3, 4]                 # 四轮电机端口
+  track: 0.30                             # 轮距 (m)
+  wheel_base: 0.28                        # 轴距 (m)
+  wheel_radius: 0.03                      # 轮半径 (m)
+  state_start: [0.3, 0.3, 0.5]            # 启动系数 [x, y, angle]
+  deadzone:
+    center: 0                             # 死区中心
+    threshold: 0.1                        # 摇杆死区阈值
+
+# ---- 轮距舵机 ----
+wheel:
+  port: 2                                 # 舵机端口
+  angle_range: [-180, 180]                # 角度范围
+  step: 3                                 # 每步角度
+
+# ---- 发射器 ----
+shooter:
+  limit_sensor: 6                         # 复位限位 ADC
+  motor: 5                                # 摩擦轮电机
+  magnet: 4                               # 电磁铁 IO
+  power: 24                               # 蓄力强度
+  stepper:
+    id: 1                                 # 步进电机 ID
+    reverse: -1                           # 弹仓步进电机 反向
