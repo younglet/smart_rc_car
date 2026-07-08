@@ -495,10 +495,22 @@ class ScreenShow_2(DevCmdInterface):
     def __init__(self) -> None:
         super().__init__(**ctl602_dev_list["led_show"])
     
+    def filter_chinese(self, text):
+        """过滤中文字符，替换为?"""
+        result = ""
+        for char in text:
+            if ord(char) > 127:  # 中文字符的Unicode编码大于127
+                result += "?"
+            else:
+                result += char
+        return result
+    
     def show(self, args):
         if type(args) != str:
             args = str(args)
-        int_values = [ord(arg) for arg in args]
+        # 过滤中文字符
+        filtered_args = self.filter_chinese(args)
+        int_values = [ord(char) for char in filtered_args]
         int_values = tuple(int_values)
         self.set(*int_values)
     
